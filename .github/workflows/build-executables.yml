@@ -1,3 +1,4 @@
+
 name: Build and Release Executables
 permissions:
   contents: write
@@ -21,44 +22,36 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.10.x
-
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
         working-directory: ./
-
       - name: Install PyInstaller
         run: |
           pip install pyinstaller
         working-directory: ./
-
       - name: Build executable
         run: |
           pyinstaller --onefile ${{ env.MAIN_PY_FILE }}
         working-directory: ./
-
       - name: List files in dist folder
         run: ls -R ./dist/
-
       - name: Upload Executable Artifact (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: build-windows
           path: dist/tabsort.exe
-
       - name: Upload Executable Artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: build-linux
           path: dist/tabsort
-
       - name: Upload Executable Artifact (macOS)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
@@ -74,21 +67,24 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-windows
-
       - name: Download Linux Executable
         uses: actions/download-artifact@v4
         with:
           name: build-linux
-
       - name: Download macOS Executable
         uses: actions/download-artifact@v4
         with:
           name: build-macos
-
       - name: Extract semver version
         id: extract_semver
-        run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
-
+        run: |
+          if [ -f VERSION ]; then
+            VERSION=$(cat VERSION)
+          else
+            echo "VERSION file not found; using commit SHA as version"
+            VERSION=${GITHUB_SHA::7}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -96,11 +92,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.extract_semver.outputs.version }}
-          release_name: ${{ steps.extract_semver.outputs.version }}
+          release_name: Release ${{ steps.extract_semver.outputs.version }}
           body: ${{ github.event.head_commit.message }}
           draft: false
           prerelease: false
-
       - name: Upload Windows Executable to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -110,7 +105,6 @@ jobs:
           asset_path: build-windows/tabsort.exe
           asset_name: tabsort_windows.exe
           asset_content_type: application/octet-stream
-
       - name: Upload Linux Executable to Release
         uses: actions/upload-release-asset@v1
         env:
@@ -120,7 +114,6 @@ jobs:
           asset_path: build-linux/tabsort
           asset_name: tabsort_linux
           asset_content_type: application/octet-stream
-
       - name: Upload macOS Executable to Release
         uses: actions/upload-release-asset@v1
         env:
