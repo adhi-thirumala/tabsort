@@ -1,3 +1,4 @@
+
 name: Build Executables
 permissions:
   contents: write
@@ -69,7 +70,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dist/tabsort.exe
-        asset_name: windows-executable.exe
+        asset_name: tabsort_windows.exe
         asset_content_type: application/octet-stream
 
     - name: Upload Executable (Linux)
@@ -80,7 +81,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dist/tabsort
-        asset_name: linux-executable
+        asset_name: tabsort_windows
         asset_content_type: application/octet-stream
 
     - name: Upload Executable (macOS)
@@ -91,6 +92,6 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dist/tabsort
-        asset_name: macos-executable
+        asset_name: tabsort_mac
         asset_content_type: application/octet-stream
 
