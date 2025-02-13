@@ -49,11 +49,10 @@ def merge_sort(arr):
     return merge(left_sorted, right_sorted)
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python interactive_sort.py <csv_file>")
-        sys.exit(1)
+    print("Welcome to the Interactive Judge Sorting Program!\n Made by: Adhi Thirumala \n")
+    
 
-    csv_file = sys.argv[1]
+    csv_file = input("Enter the name of the CSV file containing the names: ").strip()
     names = []
 
     # Open and parse the CSV file
