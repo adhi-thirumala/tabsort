@@ -45,14 +45,18 @@ jobs:
     - name: List files in dist folder
       run: ls -R ./dist/
 
+    - name: Extract semver version
+      id: extract_semver
+      run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.sha }}
-        release_name: ${{ github.sha }}
+        tag_name: ${{ steps.extract_semver.outputs.version }}
+        release_name: ${{ steps.extract_semver.outputs.version }}
         body: ${{ github.event.head_commit.message }}
         draft: false
         prerelease: false
@@ -89,3 +93,4 @@ jobs:
         asset_path: dist/tabsort
         asset_name: macos-executable
         asset_content_type: application/octet-stream
+
