@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
 
     env:
       MAIN_PY_FILE: 'tabsort.py'  # Define the path to your main.py file here
@@ -39,7 +39,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller ${{ env.MAIN_PY_FILE }}
+        pyinstaller --onefile ${{ env.MAIN_PY_FILE }}
       working-directory: ./
 
     - name: List files in dist folder
