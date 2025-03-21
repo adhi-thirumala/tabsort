@@ -40,18 +40,19 @@ jobs:
 
       - name: Upload artifact for non-Windows
         if: runner.os != 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          # Tag the artifact with the OS name (Linux or macOS)
           name: tabsort-${{ runner.os }}
           path: tabsort
+          retention-days: 7
 
       - name: Upload artifact for Windows
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: tabsort-Windows.exe
           path: tabsort.exe
+          retention-days: 7
 
   release:
     name: Create Release and Upload Assets
@@ -66,7 +67,7 @@ jobs:
         run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
@@ -78,36 +79,10 @@ jobs:
           name: "v${{ env.VERSION }}"
           draft: false
           prerelease: false
+          files: |
+            artifacts/tabsort-Linux/tabsort
+            artifacts/tabsort-macOS/tabsort
+            artifacts/tabsort-Windows.exe/tabsort.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Linux asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/tabsort-ubuntu-latest/tabsort
-          asset_name: tabsort-linux
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/tabsort-macos-latest/tabsort
-          asset_name: tabsort-mac
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/tabsort-Windows.exe/tabsort.exe
-          asset_name: tabsort-windows.exe
-          asset_content_type: application/octet-stream
 
