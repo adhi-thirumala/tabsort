@@ -1,125 +1,111 @@
-name: Build and Release Executables
-permissions:
-  contents: write
+name: Build and Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build binary on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
-        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
-
-    env:
-      MAIN_PY_FILE: 'tabsort.py'
-
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10.x
-      - name: Install Python dependencies
-        run: |
-          pip install -r requirements.txt
-        working-directory: ./
+          python-version: '3.x'
+
       - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build binary on non-Windows
+        if: runner.os != 'Windows'
         run: |
-          pip install pyinstaller
-        working-directory: ./
-      - name: Build executable
+          pyinstaller --onefile tabsort.py
+          # Ensure the output file is named "tabsort"
+          mv dist/tabsort tabsort
+      - name: Build binary on Windows
+        if: runner.os == 'Windows'
+        shell: cmd
         run: |
-          pyinstaller --onefile ${{ env.MAIN_PY_FILE }}
-        working-directory: ./
-      - name: List files in dist folder
-        run: ls -R ./dist/
-      - name: Upload Executable Artifact (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v4
+          pyinstaller --onefile tabsort.py
+          rem Rename to desired name
+          rename dist\tabsort.exe tabsort.exe
+
+      - name: Upload artifact for non-Windows
+        if: runner.os != 'Windows'
+        uses: actions/upload-artifact@v3
         with:
-          name: build-windows
-          path: dist/tabsort.exe
-      - name: Upload Executable Artifact (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+          # Tag the artifact with the OS name (Linux or macOS)
+          name: tabsort-${{ runner.os }}
+          path: tabsort
+
+      - name: Upload artifact for Windows
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
         with:
-          name: build-linux
-          path: dist/tabsort
-      - name: Upload Executable Artifact (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-macos
-          path: dist/tabsort
+          name: tabsort-Windows.exe
+          path: tabsort.exe
 
   release:
-    runs-on: ubuntu-latest
+    name: Create Release and Upload Assets
     needs: build
+    runs-on: ubuntu-latest
     steps:
-      - name: Download Windows Executable
-        uses: actions/download-artifact@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get version from VERSION file
+        id: get_version
+        run: echo "VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
         with:
-          name: build-windows
-      - name: Download Linux Executable
-        uses: actions/download-artifact@v4
-        with:
-          name: build-linux
-      - name: Download macOS Executable
-        uses: actions/download-artifact@v4
-        with:
-          name: build-macos
-      - name: Extract semver version
-        id: extract_semver
-        run: |
-          if [ -f VERSION ]; then
-            VERSION=$(cat VERSION) 
-          else
-            echo "VERSION file not found; using commit SHA as version"
-            VERSION=${GITHUB_SHA::7}
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-      - name: Create Release
+          path: artifacts
+
+      - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.extract_semver.outputs.version }}
-          release_name: Release ${{ steps.extract_semver.outputs.version }}
-          body: ${{ github.event.head_commit.message }}
+          tag_name: "v${{ env.VERSION }}"
+          name: "v${{ env.VERSION }}"
           draft: false
           prerelease: false
-      - name: Upload Windows Executable to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: work/tabsort/tabsort.exe
-          asset_name: tabsort_windows.exe
+          asset_path: artifacts/tabsort-ubuntu-latest/tabsort
+          asset_name: tabsort-linux
           asset_content_type: application/octet-stream
-      - name: Upload Linux Executable to Release
+
+      - name: Upload macOS asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: work/tabsort/tabsort
-          asset_name: tabsort_linux
+          asset_path: artifacts/tabsort-macos-latest/tabsort
+          asset_name: tabsort-mac
           asset_content_type: application/octet-stream
-      - name: Upload macOS Executable to Release
+
+      - name: Upload Windows asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: work/tabsort/tabsort
-          asset_name: tabsort_mac
+          asset_path: artifacts/tabsort-Windows.exe/tabsort.exe
+          asset_name: tabsort-windows.exe
           asset_content_type: application/octet-stream
 
