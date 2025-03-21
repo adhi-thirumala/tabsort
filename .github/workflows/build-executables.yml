@@ -78,7 +78,7 @@ jobs:
         id: extract_semver
         run: |
           if [ -f VERSION ]; then
-            VERSION=$(cat VERSION)
+            VERSION=$(cat VERSION) 
           else
             echo "VERSION file not found; using commit SHA as version"
             VERSION=${GITHUB_SHA::7}
@@ -101,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: work/tabsort/tabsort
+          asset_path: work/tabsort/tabsort.exe
           asset_name: tabsort_windows.exe
           asset_content_type: application/octet-stream
       - name: Upload Linux Executable to Release
