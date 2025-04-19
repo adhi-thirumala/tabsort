@@ -15,7 +15,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-      <main className="container mx-auto p-4 flex flex-col items-center justify-center flex-1 overflow-y-auto pt-6">
+      <div className="container mx-auto p-4 flex flex-col items-center justify-center overflow-y-auto pt-6 pb-12">
         <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center min-h-[80vh] gap-12">
           {/* Hero Section */}
           <motion.div
@@ -25,7 +25,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <motion.h1
-              className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-fuchsia-600 animate-gradient-x bg-200%"
+              className="text-5xl md:text-7xl font-extrabold tracking-tight mb-4 tabsort-gradient"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -91,13 +91,13 @@ export default function Home() {
                 Start Sorting
               </Button>
             </Link>
-            <Link href="/guide">
+            <Link href="/about">
               <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                Read the Guide
+                About TabSort
               </Button>
             </Link>
           </motion.div>
         </div>
-      </main>
+      </div>
   );
 }

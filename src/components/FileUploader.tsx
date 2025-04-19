@@ -191,8 +191,8 @@ export function FileUploader({ onUpload }: FileUploaderProps) {
       )}
 
       <Card className="p-8 w-full max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-center">Upload Participants</h2>
-        <p className="text-muted-foreground mb-6 text-center text-lg">Upload a CSV file with participant information to begin sorting</p>
+        <h2 className="text-3xl font-bold mb-6 text-center">Upload Judges</h2>
+        <p className="text-muted-foreground mb-6 text-center text-lg">Upload a CSV file with judge information to begin sorting</p>
 
         <div
           className={cn(

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function GuidePage() {
   return (
-      <main className="container mx-auto p-4 flex flex-col items-center justify-center flex-1 overflow-y-auto pt-6">
+      <div className="container mx-auto p-4 flex flex-col items-center justify-center overflow-y-auto pt-6 pb-12">
         <motion.div
           className="prose prose-lg dark:prose-invert max-w-4xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
@@ -13,20 +13,9 @@ export default function GuidePage() {
         >
           <h1 className="text-4xl font-extrabold tracking-tight mb-6">TabSort Documentation</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            A comprehensive solution for establishing ordinal judge preferences in competitive debate circuits.
+            Learn how to use TabSort to efficiently create judge preference lists for debate tournaments.
           </p>
-
-          <h2 className="text-2xl font-bold mt-12 mb-4">Why?</h2>
-          <p>
-            The establishment of ordinal preferences presents significant challenges when organizing competitive debate tournaments. The process of ranking between dozens and hundreds of judges requires considerable time and cognitive resources. TabSort has been developed to address these challenges and streamline the preference submission process.
-          </p>
-
-          <h2 className="text-2xl font-bold mt-12 mb-4">How?</h2>
-          <p>
-            The application implements the Merge-Insertion sort algorithm (also known as the Ford-Johnson algorithm), which is specifically designed to minimize the number of comparisons required. Additional information regarding this algorithm can be accessed <u><a href="https://en.wikipedia.org/wiki/Merge-insertion_sort" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">here</a></u>.
-            This approach significantly reduces cognitive burden by decomposing the complex task of establishing ordinal preferences into a series of simple binary comparisons. The result is a more efficient and less demanding process for coaches and debaters preparing for prestigious tournaments such as the Tournament of Champions.
-          </p>
-          <h2 className="text-3xl font-bold mt-16 mb-6">User Instructions</h2>
+          <h2 className="text-3xl font-bold mt-12 mb-6">User Instructions</h2>
 
           <div className="bg-card border rounded-lg p-6 shadow-sm mb-8">
             <h3 className="text-xl font-bold mb-4">Data Acquisition</h3>
@@ -55,7 +44,14 @@ export default function GuidePage() {
               For optimal efficiency when transferring preferences to the Tabroom platform, it is recommended to utilize the alphabetical sorting view. This can be accessed either directly within the application interface or by downloading the alphabetically sorted CSV file. Simultaneously, arrange the judges alphabetically by first name within the Tabroom interface. This parallel organization facilitates rapid and accurate input of numerical rankings into the Tabroom system.
             </p>
           </div>
+
+          <div className="bg-card border rounded-lg p-6 shadow-sm mb-8">
+            <h3 className="text-xl font-bold mb-4">Bug Reports</h3>
+            <p>
+              For bug reports, contact me at the information given on my personal website which you can find in the <u><a href="/tabsort/about" className="text-primary hover:underline font-medium">About</a></u> section!
+            </p>
+          </div>
         </motion.div>
-      </main>
+      </div>
   );
 }

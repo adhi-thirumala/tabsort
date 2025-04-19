@@ -44,21 +44,25 @@ export function Navbar() {
       <div className="flex items-center gap-8">
         <Link href="/">
           <h1
-            className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-500 to-fuchsia-600 animate-gradient-x bg-200% cursor-pointer hover:scale-105 transition-transform"
+            className="text-3xl font-extrabold tracking-tight tabsort-gradient cursor-pointer hover:scale-105 transition-transform"
           >
             TabSort
           </h1>
         </Link>
 
         <div className="flex items-center gap-6">
+          <Link href="/about" className="text-foreground hover:text-primary transition-colors font-medium">
+            About
+          </Link>
           <button
             onClick={handleResetClick}
             className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none p-0 cursor-pointer"
           >
             Sort
           </button>
+
           <Link href="/guide" className="text-foreground hover:text-primary transition-colors font-medium">
-            Guide
+            Docs
           </Link>
         </div>
       </div>
