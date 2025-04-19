@@ -1,0 +1,17 @@
+{
+  "name": "TabSort",
+  "short_name": "TabSort",
+  "description": "A tool for solving ordinal judge preferences in national circuit debate tournaments",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#f97316",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
