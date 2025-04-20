@@ -1,24 +1,35 @@
-FROM node:18-alpine AS base
+FROM --platform=linux/arm64 node:23.9-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
 # Copy package.json and package-lock.json (if available)
-COPY package.json package-lock.json* ./
+COPY src/package.json src/package-lock.json* ./
 
-# Install dependencies
-RUN npm ci
+
+RUN rm -rf node_modules
+# before your main `npm install`
+RUN npm install --save-optional \
+    lightningcss-linux-arm64-musl \
+    @tailwindcss/oxide-linux-arm64-musl
+
+# then install everything (including optional deps)
+
+RUN npm ci --platform=linux/arch64 --arch=arm64 --include=optional
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY src .
 
 # Next.js collects anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN npm i lightningcss-linux-arm64-gnu --legacy-peer-deps --omit=dev
+RUN npm install --platform=linux --arch=arm64 @tailwindcss/postcss
 
 # Build the application
 RUN npm run build
@@ -33,7 +44,10 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+# Create public directory if it doesn't exist
+RUN mkdir -p ./public
+# Copy public directory if it exists in the builder
+COPY --from=builder /app/public ./public 2>/dev/null || true
 
 # Set the correct permission for prerender cache
 RUN mkdir .next

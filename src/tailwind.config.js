@@ -43,4 +43,10 @@ export default {
     },
   },
   plugins: [animate],
+  experimental: {
+    oxide: false,
+  },
+  future: {
+    removeDeprecatedGapUtilities: true
+  },
 }
