@@ -18,7 +18,9 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
   const startSorting = (initialPeople: Person[]) => {
     if (initialPeople.length < 2) {
       setSorted(true);
-      setProgress(100);
+      // Set comparisons count to match total for progress calculation
+      setComparisonsCount(1);
+      setTotalComparisons(1);
       return;
     }
 
