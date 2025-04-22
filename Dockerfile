@@ -22,7 +22,9 @@ RUN npm ci --platform=linux/arch64 --arch=arm64 --include=optional
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+# Copy src directory and ensure public directory is properly copied
 COPY src .
+COPY src/public ./public
 
 # Next.js collects anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
@@ -44,10 +46,9 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Create public directory if it doesn't exist
-RUN mkdir -p ./public
-# Copy public directory if it exists in the builder
-COPY --from=builder /app/public ./public 2>/dev/null || true
+# Copy public directory from src
+COPY --from=builder /app/public ./public
+RUN chown nextjs:nodejs ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next

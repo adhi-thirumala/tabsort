@@ -92,16 +92,16 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
       setCurrentComparisonIndex(nextIndex);
       setComparing([newPairs[nextIndex][0], newPairs[nextIndex][1]]);
     } else {
-      // All pairs compared, prepare for merging phase
+      // All pairs compared, prepare for insertion phase
       const sortedPairs = [...newPairs];
-      const newMainChain: Person[] = [sortedPairs[0][0]];
+      const newMainChain: Person[] = [];
       const newPend: Person[] = [];
 
       // Build main chain and pend list
       for (let i = 0; i < sortedPairs.length; i++) {
-        if (i > 0) {
-          newMainChain.push(sortedPairs[i][0]);
-        }
+        // Add winners to main chain
+        newMainChain.push(sortedPairs[i][0]);
+        // Add losers to pend list
         newPend.push(sortedPairs[i][1]);
       }
 
@@ -109,6 +109,10 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
       if (people.length % 2 !== 0) {
         newPend.push(people[people.length - 1]);
       }
+
+      // Note: For optimal Ford-Johnson algorithm, we should insert elements in a specific order
+      // based on Jacobsthal numbers. However, in an interactive UI, we'll insert them sequentially
+      // for simplicity and better user experience.
 
       setMainChain(newMainChain);
       setPend(newPend);
@@ -139,20 +143,22 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
     const newMainChain = [...mainChain];
     const currentPend = pend[pendIndex];
 
-    // Determine where to insert based on comparison
+    // Update search range based on comparison result
+    let low = currentComparisonIndex;
+    let high = insertionIndex;
+
     if (selectedPerson === comparing[0]) {
-      // The main chain element is preferred, so insert after it
-      setInsertionIndex(currentComparisonIndex + 1);
+      // Main chain element is preferred (goes before the pend element)
+      low = currentComparisonIndex + 1;
     } else {
-      // The pend element is preferred, so insert before the current comparison
-      setInsertionIndex(currentComparisonIndex);
+      // Pend element is preferred (goes before the main chain element)
+      high = currentComparisonIndex;
     }
 
-    // Continue binary search or finalize insertion
-    const mid = Math.floor((insertionIndex + currentComparisonIndex) / 2);
-    if (insertionIndex === currentComparisonIndex || mid === currentComparisonIndex) {
+    // Check if we've narrowed down to the insertion point
+    if (low >= high) {
       // We've found the insertion point
-      newMainChain.splice(insertionIndex, 0, currentPend);
+      newMainChain.splice(low, 0, currentPend);
       setMainChain(newMainChain);
 
       // Move to next pend element
@@ -165,13 +171,11 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
         finalizeSorting(newMainChain);
       }
     } else {
-      // Continue binary search
+      // Continue binary search with updated range
+      const mid = Math.floor((low + high) / 2);
       setComparing([newMainChain[mid], currentPend]);
-      if (selectedPerson === comparing[0]) {
-        setCurrentComparisonIndex(mid);
-      } else {
-        setInsertionIndex(mid);
-      }
+      setCurrentComparisonIndex(mid);
+      setInsertionIndex(high);
     }
   };
 
@@ -184,8 +188,25 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
 
     const elementToInsert = pendList[index];
 
-    // For the first element, compare with the first element in the chain
-    if (chain.length === 1) {
+    // For the first element or empty chain, handle specially
+    if (chain.length <= 1) {
+      if (chain.length === 0) {
+        // If chain is empty, just add the element
+        chain.push(elementToInsert);
+        setMainChain(chain);
+
+        // Move to next pend element
+        const nextPendIndex = index + 1;
+        if (nextPendIndex < pendList.length) {
+          setPendIndex(nextPendIndex);
+          prepareNextInsertion(chain, pendList, nextPendIndex);
+        } else {
+          finalizeSorting(chain);
+        }
+        return;
+      }
+
+      // If chain has one element, compare with it
       setComparing([chain[0], elementToInsert]);
       setCurrentComparisonIndex(0);
       setInsertionIndex(1);
@@ -194,12 +215,12 @@ export function useMergeInsertionSort(people: Person[], setPeople: (people: Pers
 
     // Start binary search for insertion point
     const low = 0;
-    const high = chain.length - 1;
+    const high = chain.length;
     const mid = Math.floor((low + high) / 2);
 
     setComparing([chain[mid], elementToInsert]);
     setCurrentComparisonIndex(mid);
-    setInsertionIndex(high + 1);
+    setInsertionIndex(high);
   };
 
   // Finalize the sorting process
