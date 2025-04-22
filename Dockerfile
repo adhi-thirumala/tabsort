@@ -14,6 +14,8 @@ RUN npm install --save-optional \
     lightningcss-linux-arm64-musl \
     @tailwindcss/oxide-linux-arm64-musl
 
+RUN npm install --platform=linux --arch=arm64 @tailwindcss/postcss
+
 # then install everything (including optional deps)
 
 RUN npm ci --platform=linux/arch64 --arch=arm64 --include=optional
@@ -30,12 +32,10 @@ COPY src/public ./public
 # Learn more here: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN npm i lightningcss-linux-arm64-gnu --legacy-peer-deps --omit=dev
-RUN npm install --platform=linux --arch=arm64 @tailwindcss/postcss
 
 # Build the application
 RUN npm run build
-
+# Add after npm run build
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -46,17 +46,15 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy public directory from src
-COPY --from=builder /app/public ./public
-RUN chown nextjs:nodejs ./public
+# Create public directory if it doesn't exist
+RUN mkdir -p ./public
+# Copy public directory if it exists in the builder
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Automatically leverage output traces to reduce image size
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Automatically leverage output traces to reduce image sizeS
 
 USER nextjs
 
@@ -65,4 +63,4 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
